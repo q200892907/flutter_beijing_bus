@@ -6,7 +6,8 @@ export 'package:auto_size_text/auto_size_text.dart';
 export 'package:marquee_flutter/marquee_flutter.dart';
 export 'package:simple_rc4/simple_rc4.dart';
 export 'package:animated_text_kit/animated_text_kit.dart';
-export 'package:amap_base/amap_base.dart';
+export 'package:flutter_map/flutter_map.dart';
+export 'package:location/location.dart';
 
 //配置信息
 export 'config/config.dart';
@@ -47,4 +48,3 @@ export 'api/app_api.dart';
 export 'utils/bus_util.dart';
 export 'utils/api_util.dart';
 export 'utils/sqlite_util.dart';
-export 'utils/map_util.dart';

@@ -1,4 +1,5 @@
 import '../include.dart';
+import 'package:latlong/latlong.dart';
 
 class BusMapView extends StatefulWidget {
   final EdgeInsets controlsPadding; //控件偏移
@@ -25,71 +26,79 @@ class BusMapView extends StatefulWidget {
 }
 
 class _BusMapViewState extends State<BusMapView> {
-  AMapController _controller;
-  AMapOptions _mapOptions;
+  MapController _controller;
   int _zoom = 17;
-  List<RealTimeBusBean> _bus;
+  LatLng _currentLatLng;
+  LatLng _swLatLng;
+  LatLng _neLatLng;
+  double _currentZoom = 17;
+  bool _isFirst = true;
 
   @override
   void initState() {
     super.initState();
+    _controller = MapController();
   }
 
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(BusMapView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateMarker();
+  double _getScale() {
+    return _currentZoom / _zoom;
   }
 
   @override
   Widget build(BuildContext context) {
-    _mapOptions = AMapOptions(
-      zoomControlsEnabled: false,
-      zoomGesturesEnabled: false,
-      rotateGesturesEnabled: false,
-      //缩放控件关闭
-      scaleControlsEnabled: false,
-      //比例尺关闭
-      tiltGesturesEnabled: false,
-      //3D模式关闭
-      compassEnabled: false,
-      //指北针
-      mapType: MAP_TYPE_NORMAL,
-      //地图模式
-      myLocationEnabled: true,
-    );
+    _toStation();
     return Stack(
       children: <Widget>[
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: AMapView(
-            amapOptions: _mapOptions,
-            onAMapViewCreated: (controller) {
-              _controller = controller;
-              MapUtil.setZoom(controller: _controller, zoom: _zoom); //地图创建成功默认17级
-              MapUtil.setUiSettings(controller: _controller); //iOS二次设置
-              _controller.addPolyline(PolylineOptions(latLngList: widget.busLine == null ? [] : widget.busLine, width: 10, color: AppColors.COLOR_THEME));
-              _controller.clearMarkers();
-              for (StationBean value in widget.busStations) {
-                LatLng latLng = LatLng(double.parse(value.lat), double.parse(value.lon));
-                if (value.no == widget.stationId) {
-                  MapUtil.setPosition(controller: _controller, latLng: latLng,zoom: _zoom.floorToDouble());
-                }
-                _controller.addMarker(
-                  MarkerOptions(
-                    position: latLng,
-                    icon: value.no == widget.stationId ? JvtdImage.imagePath(name: AppImages.BUS_STATION_CURRENT) : JvtdImage.imagePath(name: AppImages.BUS_STATION),
-                    enabled: false,
-                  ),
-                );
-              }
-            },
+          child: FlutterMap(
+            options: MapOptions(
+              center: _currentLatLng,
+              zoom: _zoom.floorToDouble(),
+              maxZoom: 19,
+              minZoom: 13,
+              onPositionChanged: _changed,
+              swPanBoundary: _swLatLng,
+              nePanBoundary: _neLatLng,
+            ),
+            mapController: _controller,
+            layers: [
+              TileLayerOptions(
+                urlTemplate: 'http://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', //瓦片地图的URL
+                subdomains: ["1", "2", "3", "4"],
+              ),
+              PolylineLayerOptions(
+                polylines: [
+                  Polyline(points: widget.busLine, color: AppColors.COLOR_THEME, strokeWidth: 5 * _getScale()),
+                ],
+              ),
+              MarkerLayerOptions(
+                markers: widget.busStations.map((item) {
+                  return Marker(
+                    builder: (context) {
+                      return JvtdImage.local(name: item.no == widget.stationId ? AppImages.BUS_STATION_CURRENT : AppImages.BUS_STATION);
+                    },
+                    point: LatLng(double.parse(item.lat), double.parse(item.lon)),
+                    width: 30 * _getScale(),
+                    height: 30 * _getScale(),
+                  );
+                }).toList(),
+              ),
+              MarkerLayerOptions(
+                markers: widget.busInfo == null
+                    ? []
+                    : widget.busInfo.map((item) {
+                        return Marker(
+                          builder: (context) {
+                            return JvtdImage.local(name: AppImages.BUS_RED);
+                          },
+                          point: LatLng(double.parse(item.lat), double.parse(item.lon)),
+                          width: 20 * _getScale(),
+                          height: 20 * _getScale(),
+                        );
+                      }).toList(),
+              ),
+            ],
           ),
         ),
         _buildControls(context),
@@ -97,30 +106,31 @@ class _BusMapViewState extends State<BusMapView> {
     );
   }
 
-  void _updateMarker(){
-    if(widget.busInfo == null || widget.busInfo.isEmpty) return;
-    _controller.clearMarkers();
+  void _toStation() {
+    double maxLat;
+    double minLat;
+    double maxLon;
+    double minLon;
+    int i=0;
     for (StationBean value in widget.busStations) {
-      LatLng latLng = LatLng(double.parse(value.lat), double.parse(value.lon));
-      _controller.addMarker(
-        MarkerOptions(
-          position: latLng,
-          icon: value.no == widget.stationId ? JvtdImage.imagePath(name: AppImages.BUS_STATION_CURRENT) : JvtdImage.imagePath(name: AppImages.BUS_STATION),
-          enabled: false,
-        ),
-      );
+      if(i==0){
+        maxLat = double.parse(value.lat);
+        minLat = maxLat;
+        maxLon = double.parse(value.lon);
+        minLon = maxLon;
+      }else{
+        maxLat = max(maxLat, double.parse(value.lat));
+        minLat = min(minLat, double.parse(value.lat));
+        maxLon = max(maxLon, double.parse(value.lon));
+        minLon = min(minLon, double.parse(value.lon));
+      }
+      i++;
+      if (value.no == widget.stationId) {
+        _currentLatLng = LatLng(double.parse(value.lat), double.parse(value.lon));
+      }
     }
-    widget.busInfo.forEach((value) {
-      _controller.addMarker(
-        MarkerOptions(
-            position: LatLng(
-              double.parse(value.lat),
-              double.parse(value.lon),
-            ),
-            icon: JvtdImage.imagePath(name: AppImages.BUS_RED),
-            enabled: false),
-      );
-    });
+    _swLatLng = LatLng(minLat, minLon);
+    _neLatLng = LatLng(maxLat, maxLon);
   }
 
   Widget _buildControls(BuildContext context) {
@@ -128,19 +138,13 @@ class _BusMapViewState extends State<BusMapView> {
       padding: widget.controlsPadding,
       alignment: Alignment.bottomCenter,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: _buildLocationControls(context),
-          ),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildRightControls(context),
-            ),
           ),
         ],
       ),
@@ -149,45 +153,28 @@ class _BusMapViewState extends State<BusMapView> {
 
   List<Widget> _buildLocationControls(BuildContext context) {
     return [
-//      IconButton(
-//        icon: JvtdImage.local(name: AppImages.MAP_LOCATION),
-//        iconSize: widget.iconSize,
-//        onPressed: () {
-//          toCurrentLocation();
-//        },
-//      )
+      IconButton(
+        icon: JvtdImage.local(name: AppImages.MAP_LOCATION),
+        iconSize: widget.iconSize,
+        onPressed: () {
+          toCurrentLocation();
+        },
+      )
     ];
   }
 
-  void toCurrentLocation() async {
-    //todo 移动当前位置有问题
-    LatLng latLng = await _controller.getCenterLatlng();
-    MapUtil.setPosition(controller: _controller, latLng: latLng, zoom: _zoom.toDouble());
-//    GsaMapUtils.move(controller: _controller, latLng: latLng);
+  void toCurrentLocation() {
+    _toStation();
+    _controller.move(_currentLatLng, _currentZoom.floorToDouble());
   }
 
-  List<Widget> _buildRightControls(BuildContext context) {
-    List<Widget> rightWidgets = <Widget>[];
-    rightWidgets.add(
-      IconButton(
-        icon: JvtdImage.local(name: AppImages.MAP_ADD),
-        iconSize: widget.iconSize,
-        onPressed: () {
-          _zoom = MapUtil.setZoom(controller: _controller, zoom: ++_zoom);
-        },
-        padding: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 0),
-      ),
-    );
-    rightWidgets.add(
-      IconButton(
-        icon: JvtdImage.local(name: AppImages.MAP_SUB),
-        iconSize: widget.iconSize,
-        onPressed: () {
-          _zoom = MapUtil.setZoom(controller: _controller, zoom: --_zoom);
-        },
-        padding: EdgeInsets.only(top: 0, left: 8, right: 8, bottom: 8),
-      ),
-    );
-    return rightWidgets;
+  _changed(MapPosition position, bool hasGesture) {
+    if (_isFirst) {
+      _isFirst = false;
+      return;
+    }
+    _currentLatLng = position.center;
+    _currentZoom = position.zoom;
+    setState(() {});
   }
 }

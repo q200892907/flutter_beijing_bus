@@ -1,7 +1,6 @@
 import 'include.dart';
 
 void main() {
-  MapUtil.init();
   runApp(MyApp());
 }
 
