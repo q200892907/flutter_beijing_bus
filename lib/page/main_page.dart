@@ -21,7 +21,7 @@ class _MainPageState extends AppPageState<MainPage> with SingleTickerProviderSta
     super.initData(context);
     _tabTitles = <String>[
       AppStrings.getLocale(context).realTimeQuery,
-      AppStrings.getLocale(context).changeToTheQuery,
+//      AppStrings.getLocale(context).changeToTheQuery,
     ];
     _controller = TabController(length: _tabTitles.length, vsync: this);
   }
@@ -58,7 +58,7 @@ class _MainPageState extends AppPageState<MainPage> with SingleTickerProviderSta
         child: TabBarView(
           children: <Widget>[
             RealTimePage(),
-            ChangePage(),
+//            ChangePage(),
           ],
           controller: _controller,
         ),

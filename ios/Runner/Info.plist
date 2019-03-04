@@ -23,11 +23,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    	<string>需要您的定位服务，否则可能无法使用，如果您需要使用后台导航功能请选择“始终允许”。</string>
-    	<key>NSLocationAlwaysUsageDescription</key>
-    	<string>需要您的定位服务，否则可能无法使用。</string>
-    	<key>NSLocationWhenInUseUsageDescription</key>
-    	<string>需要您的定位服务，否则可能无法使用。</string>
+	<string>需要您的定位服务，否则可能无法使用，如果您需要使用后台导航功能请选择“始终允许”。</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>需要您的定位服务，否则可能无法使用。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>需要您的定位服务，否则可能无法使用。</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -35,8 +35,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -48,6 +46,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
-    	<true/>
+	<true/>
 </dict>
 </plist>
