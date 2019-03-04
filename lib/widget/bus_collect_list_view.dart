@@ -22,7 +22,7 @@ class _BusCollectListViewState extends AppListViewState<CollectBusBean, BusColle
   void initState() {
     super.initState();
     Application.eventBus.on<CollectBusListUpdateEvent>().listen((data) {
-      if(widget.isProminent) {
+      if (widget.isProminent) {
         _getCollectBus();
       }
     });
@@ -41,7 +41,7 @@ class _BusCollectListViewState extends AppListViewState<CollectBusBean, BusColle
   Widget buildItemWidget(BuildContext context, int position) {
     return BusCollectView(
         bus: listData[position],
-        realTimeBus: _realTimeBusList != null && _realTimeBusList.elementAt(position) != null &&  !_realTimeBusList[position].isEmpty() ? _realTimeBusList[position] : null,
+        realTimeBus: _realTimeBusList != null && _realTimeBusList[position] != null && !_realTimeBusList[position].isEmpty() ? _realTimeBusList[position] : null,
         icon: !widget.isProminent,
         prominentUpdate: () {
           setState(() {});
@@ -120,8 +120,8 @@ class _BusCollectListViewState extends AppListViewState<CollectBusBean, BusColle
             }
           }
           _realTimeBusList.add(bus);
-          setState(() {});
         });
+        setState(() {});
       }
     });
   }

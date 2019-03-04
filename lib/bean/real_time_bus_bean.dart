@@ -64,7 +64,7 @@ class RealTimeBusBean {
   });
 
   bool isEmpty(){
-    return mid.isEmpty;
+    return mid == null || mid.isEmpty;
   }
 
   decode() {
