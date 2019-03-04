@@ -28,6 +28,7 @@ class _BusMapViewState extends State<BusMapView> {
   AMapController _controller;
   AMapOptions _mapOptions;
   int _zoom = 17;
+  List<RealTimeBusBean> _bus;
 
   @override
   void initState() {
@@ -78,7 +79,7 @@ class _BusMapViewState extends State<BusMapView> {
               for (StationBean value in widget.busStations) {
                 LatLng latLng = LatLng(double.parse(value.lat), double.parse(value.lon));
                 if (value.no == widget.stationId) {
-                  MapUtil.move(controller: _controller, latLng: latLng);
+                  MapUtil.setPosition(controller: _controller, latLng: latLng,zoom: _zoom.floorToDouble());
                 }
                 _controller.addMarker(
                   MarkerOptions(
