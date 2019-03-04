@@ -39,13 +39,34 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        multiDexEnabled true
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("flutter.jks")
+            storePassword "jutongda178"
+            keyAlias "bus"
+            keyPassword "jutongda178"
+        }
+//        MD5: 03:21:D6:0E:6D:EE:5E:53:DD:F8:80:FA:07:CD:AC:36
+//        SHA1: 1A:04:54:83:03:8E:F7:BE:32:C2:80:F7:50:C7:2F:79:D5:3A:B6:EF
+//        SHA256: 00:9E:04:20:EB:E2:4A:AE:0B:77:B0:08:D2:77:97:C9:BE:AC:11:9D:BC:8D:CA:B8:C3:34:F1:14:BB:DE:98:AD
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
         }
     }
 }
@@ -58,4 +79,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.android.support:multidex:1.0.3'
 }

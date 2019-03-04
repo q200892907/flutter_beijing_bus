@@ -45,6 +45,8 @@ dependencies:
 
   sqflite: ^1.1.0
 
+  amap_base: 0.2.11+3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

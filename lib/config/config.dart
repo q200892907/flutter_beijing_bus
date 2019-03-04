@@ -111,4 +111,11 @@ class AppImages {
   static const String ORBITAL = 'icon_orbital.png';
   static const String STATION_BOARD = 'icon_station_board.png';
   static const String BUS_BG = 'icon_house.png';
+  static const String BUS_STATION = 'icon_bus_station.png';
+  static const String BUS_STATION_CURRENT = 'icon_bus_station_current.png';
+  static const String BUS_RED = 'icon_bus_red.png';
+
+  static const String MAP_LOCATION = 'icon_map_location.png'; //地图当前位置
+  static const String MAP_ADD = 'icon_map_add.png'; //地图级别加
+  static const String MAP_SUB = 'icon_map_sub.png'; //地图级别减
 }

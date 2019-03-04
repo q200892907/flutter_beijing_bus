@@ -1,6 +1,9 @@
 import 'include.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  MapUtil.init();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   /// 创建Store，引用 AppState 中的 appReducer 创建 Reducer

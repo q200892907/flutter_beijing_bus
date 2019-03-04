@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../include.dart';
 
 class BusPage extends StatefulWidget {
@@ -21,6 +23,7 @@ class BusPage extends StatefulWidget {
 class _BusPageState extends AppPageState<BusPage> {
   GetBusApi _getBusApi;
   BusBean _busBean;
+  List<LatLng> _busLine = [];
   CollectBusBean _collectBus;
   int _stationNum = -1; //当前还有几站
   String _distance = AppConfigs.DISTANCE_PLACEHOLDER; //距离站点公里
@@ -76,74 +79,92 @@ class _BusPageState extends AppPageState<BusPage> {
   Expanded _buildAllBus() {
     return _busBean != null
         ? Expanded(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 150,
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemBuilder: (context, pos) {
-                    StationBean stationBean = _stations[pos];
-                    StationType type;
-                    if (stationBean.isStation()) {
-                      if (int.parse(stationBean.no) < int.parse(widget.stationId)) {
-                        type = StationType.BEFORE;
-                      } else if (int.parse(stationBean.no) > int.parse(widget.stationId)) {
-                        type = StationType.AFTER;
-                      } else {
-                        type = StationType.CURRENT;
+            child: Column(
+              children: <Widget>[
+                _buildMap(),
+                Container(
+                  height: 150,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemBuilder: (context, pos) {
+                      StationBean stationBean = _stations[pos];
+                      StationType type;
+                      if (stationBean.isStation()) {
+                        if (int.parse(stationBean.no) < int.parse(widget.stationId)) {
+                          type = StationType.BEFORE;
+                        } else if (int.parse(stationBean.no) > int.parse(widget.stationId)) {
+                          type = StationType.AFTER;
+                        } else {
+                          type = StationType.CURRENT;
+                        }
                       }
-                    }
-                    return Stack(
-                      children: <Widget>[
-                        stationBean.isStation()
-                            ? Stack(
-                                children: <Widget>[
-                                  StationBoard(
-                                    line: _busBean.shotName,
-                                    type: type,
-                                    name: stationBean.name,
-                                    width: type == StationType.CURRENT ? 150 : 100,
-                                  ),
-                                  Container(
-                                    width: type == StationType.CURRENT ? 150 : 100,
-                                    child: Align(
-                                      alignment: Alignment.bottomCenter,
-                                      child: JvtdImage.local(
-                                        name: AppImages.BUS_CROSS,
-                                        color: stationBean.stationBus != null && stationBean.stationBus.length > 0 ? AppColors.COLOR_FFAD2C : Colors.transparent,
-                                        fit: BoxFit.contain,
-                                        width: type == StationType.CURRENT ? 120 : 80,
-                                      ),
+                      return Stack(
+                        children: <Widget>[
+                          stationBean.isStation()
+                              ? Stack(
+                                  children: <Widget>[
+                                    StationBoard(
+                                      line: _busBean.shotName,
+                                      type: type,
+                                      name: stationBean.name,
+                                      width: type == StationType.CURRENT ? 150 : 100,
                                     ),
-                                  )
-                                ],
-                              )
-                            : Container(
-                                width: pos == 0 || pos == _stations.length - 1 ? 16 : 80,
-                                child: pos == 0 || pos == _stations.length - 1
-                                    ? null
-                                    : Align(
+                                    Container(
+                                      width: type == StationType.CURRENT ? 150 : 100,
+                                      child: Align(
                                         alignment: Alignment.bottomCenter,
                                         child: JvtdImage.local(
-                                            name: AppImages.BUS_CROSS,
-                                            color: stationBean.stationBus != null && stationBean.stationBus.length > 0 ? AppColors.COLOR_FF6053 : Colors.transparent,
-                                            width: 60,
-                                            fit: BoxFit.contain),
+                                          name: AppImages.BUS_CROSS,
+                                          color: stationBean.stationBus != null && stationBean.stationBus.length > 0 ? AppColors.COLOR_FFAD2C : Colors.transparent,
+                                          fit: BoxFit.contain,
+                                          width: type == StationType.CURRENT ? 120 : 80,
+                                        ),
                                       ),
-                              ),
-                      ],
-                    );
-                  },
-                  itemCount: _stations.length,
-                  scrollDirection: Axis.horizontal,
+                                    )
+                                  ],
+                                )
+                              : Container(
+                                  width: pos == 0 || pos == _stations.length - 1 ? 16 : 80,
+                                  child: pos == 0 || pos == _stations.length - 1
+                                      ? null
+                                      : Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: JvtdImage.local(
+                                              name: AppImages.BUS_CROSS,
+                                              color: stationBean.stationBus != null && stationBean.stationBus.length > 0 ? AppColors.COLOR_FF6053 : Colors.transparent,
+                                              width: 60,
+                                              fit: BoxFit.contain),
+                                        ),
+                                ),
+                        ],
+                      );
+                    },
+                    itemCount: _stations.length,
+                    scrollDirection: Axis.horizontal,
+                  ),
                 ),
-              ),
+              ],
             ),
           )
         : Expanded(
             child: Container(),
           );
+  }
+
+  Widget _buildMap() {
+    return Expanded(
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: EdgeInsets.only(left: 16, right: 16, bottom: 64),
+        elevation: 8,
+        child: BusMapView(
+          busLine: _busLine,
+          busInfo: _allBus,
+          busStations: _busBean.stations.station,
+          stationId: widget.stationId,
+        ),
+      ),
+    );
   }
 
   Widget _buildBus(BuildContext context) {
@@ -342,9 +363,15 @@ class _BusPageState extends AppPageState<BusPage> {
             _stations.add(StationBean());
           }
           _stations.add(_busBean.stations.station[i]);
-          if(i < _busBean.stations.station.length - 1) {
-            _stations.add(StationBean(no: _busBean.stations.station[i+1].no));
+          if (i < _busBean.stations.station.length - 1) {
+            _stations.add(StationBean(no: _busBean.stations.station[i + 1].no));
           }
+        }
+        List<String> points = _busBean.coord.split(',');
+        _busLine = [];
+        for (int i1 = 0; i1 < points.length / 2; i1++) {
+          LatLng latLng = LatLng(double.parse(points[i1 * 2 + 1]), double.parse(points[i1 * 2]));
+          _busLine.add(latLng);
         }
         _startTimer();
         setState(() {});
@@ -404,7 +431,7 @@ class _BusPageState extends AppPageState<BusPage> {
             if (item1.nextStationNo == item.no) {
               if (item1.busStatusForNextStation() == BusStatus.ARRIVE && item.isStation()) {
                 item.addBus(item1);
-              } else if(item1.busStatusForNextStation() != BusStatus.ARRIVE && !item.isStation()){
+              } else if (item1.busStatusForNextStation() != BusStatus.ARRIVE && !item.isStation()) {
                 item.addBus(item1);
               }
             }
@@ -444,15 +471,16 @@ class _BusPageState extends AppPageState<BusPage> {
     );
     _collectBus = await SqliteUtil.instance.collectProvider.insert(collectBusBean);
     setState(() {});
-    Application.eventBus.fire(CollectBusUpdateEvent(_collectBus,true));
+    Application.eventBus.fire(CollectBusUpdateEvent(_collectBus, true));
   }
 
-  void _toCurrentStation() async{
+  void _toCurrentStation() {
     double offset = 0;
     int id = int.parse(widget.stationId);
-    offset = 16.0 + (id-2) * 180;
+    offset = 16.0 + (id - 2) * 180;
+    //todo 有问题
     Future.delayed(Duration(milliseconds: 200), () {
-      _scrollController.animateTo(offset, duration: Duration(milliseconds: 100), curve: Curves.linear);
+      _scrollController.animateTo(offset, duration: Duration(milliseconds: 200), curve: Curves.ease);
     });
   }
 }
