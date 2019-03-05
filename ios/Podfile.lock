@@ -29,7 +29,7 @@ PODS:
 
 DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `.symlinks/flutter/ios-release`)
   - flutter_picker (from `.symlinks/plugins/flutter_picker/ios`)
   - flutter_statusbar_manager (from `.symlinks/plugins/flutter_statusbar_manager/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
@@ -49,7 +49,7 @@ EXTERNAL SOURCES:
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: ".symlinks/flutter/ios-release"
   flutter_picker:
     :path: ".symlinks/plugins/flutter_picker/ios"
   flutter_statusbar_manager:
@@ -86,4 +86,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: aff02bfeed411c636180d6812254b2daeea14d09
 
-COCOAPODS: 1.5.2
+COCOAPODS: 1.5.3
