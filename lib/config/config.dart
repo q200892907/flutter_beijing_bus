@@ -104,6 +104,7 @@ class AppImages {
   static const String BUS = 'icon_bus.png';
   static const String BUS_CROSS = 'icon_bus_1.png';
   static const String BUS_HALF = 'icon_bus_half.png';
+  static const String BUS_INFO_BG = 'icon_bus_info_bg.png';
   static const String DIRECTION = 'icon_direction.png';
   static const String LINE = 'icon_line.png';
   static const String STATION = 'icon_station.png';

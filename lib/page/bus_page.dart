@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../include.dart';
 import 'package:latlong/latlong.dart';
+import '../widget/bus_map_dialog.dart';
 
 class BusPage extends StatefulWidget {
   final String busId;
@@ -38,8 +39,19 @@ class _BusPageState extends AppPageState<BusPage> {
   ScrollController _scrollController;
 
   @override
-  String appBarTitle(BuildContext context) {
-    return AppStrings.getLocale(context).realTimeQuery;
+  Widget appBar(BuildContext context) {
+    return JvtdAppBar.text(
+      title: AppStrings.getLocale(context).realTimeQuery,
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.map,
+            color: AppColors.COLOR_000,
+          ),
+          onPressed: _showMapDialog,
+        ),
+      ],
+    );
   }
 
   @override
@@ -154,17 +166,7 @@ class _BusPageState extends AppPageState<BusPage> {
 
   Widget _buildMap() {
     return Expanded(
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        margin: EdgeInsets.only(left: 16, right: 16, bottom: 64),
-        elevation: 8,
-        child: BusMapView(
-          busLine: _busLine,
-          busInfo: _allBus,
-          busStations: _busBean.stations.station,
-          stationId: widget.stationId,
-        ),
-      ),
+      child: Container(),
     );
   }
 
@@ -174,21 +176,33 @@ class _BusPageState extends AppPageState<BusPage> {
       margin: EdgeInsets.all(16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       color: AppColors.COLOR_FFF,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: <Widget>[
-            _buildBusAndStation(context),
-            SizedBox(height: 16),
-            _buildRealTimeBusInfo(context),
-            SizedBox(height: 8),
-            _buildDottedLine(),
-            SizedBox(height: 8),
-            _busBean != null ? _buildPoints() : Container(),
-            SizedBox(height: _busBean != null ? 4 : 0),
-            _busBean != null ? _buildTime(context) : Container(),
-          ],
-        ),
+      child: Stack(
+        children: <Widget>[
+          Opacity(
+            opacity: 0.2,
+            child: Container(
+              padding: EdgeInsets.only(top: 24),
+              alignment:Alignment.centerRight,
+              child: JvtdImage.local(name: AppImages.BUS_INFO_BG,color: AppColors.COLOR_THEME,height: 100,width: 50),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: <Widget>[
+                _buildBusAndStation(context),
+                SizedBox(height: 16),
+                _buildRealTimeBusInfo(context),
+                SizedBox(height: 8),
+                _buildDottedLine(),
+                SizedBox(height: 8),
+                _busBean != null ? _buildPoints() : Container(),
+                SizedBox(height: _busBean != null ? 4 : 0),
+                _busBean != null ? _buildTime(context) : Container(),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -483,5 +497,19 @@ class _BusPageState extends AppPageState<BusPage> {
     Future.delayed(Duration(milliseconds: 200), () {
       _scrollController.animateTo(offset, duration: Duration(milliseconds: 200), curve: Curves.ease);
     });
+  }
+
+  _showMapDialog() {
+    showJvtdDialog(
+        context: context,
+        builder: (context) {
+          return BusMapDialog(
+            busLine: _busLine,
+            busStations: _busBean.stations.station,
+            busInfo: _allBus,
+            stationId: widget.stationId,
+            bus: _busBean,
+          );
+        });
   }
 }

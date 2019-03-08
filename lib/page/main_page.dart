@@ -49,6 +49,7 @@ class _MainPageState extends AppPageState<MainPage> with SingleTickerProviderSta
         )
       ],
     );
+    showLoading();
   }
 
   Widget _buildTabBarView() {

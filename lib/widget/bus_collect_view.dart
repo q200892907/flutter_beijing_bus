@@ -30,19 +30,31 @@ class BusCollectView extends StatelessWidget {
         margin: EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         color: AppColors.COLOR_FFF,
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: <Widget>[
-              _buildBusAndStation(context),
-              SizedBox(height: 16),
-              _buildRealTimeBusInfo(context),
-              SizedBox(height: 8),
-              _buildDottedLine(),
-              SizedBox(height: 8),
-              _buildPoints(),
-            ],
-          ),
+        child: Stack(
+          children: <Widget>[
+            Opacity(
+              opacity: 0.2,
+              child: Container(
+                padding: EdgeInsets.only(top: 24),
+                alignment:Alignment.centerRight,
+                child: JvtdImage.local(name: AppImages.BUS_INFO_BG,color: AppColors.COLOR_THEME,height: 100,width: 50),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: <Widget>[
+                  _buildBusAndStation(context),
+                  SizedBox(height: 16),
+                  _buildRealTimeBusInfo(context),
+                  SizedBox(height: 8),
+                  _buildDottedLine(),
+                  SizedBox(height: 8),
+                  _buildPoints(),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

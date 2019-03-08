@@ -94,7 +94,7 @@ class _BusCollectListViewState extends AppListViewState<CollectBusBean, BusColle
     );
   }
 
-  void _getRealTimeBusList() {
+  void _getRealTimeBusList([String s]) {
     if (_getRealTimeBusListTwoApi == null) _getRealTimeBusListTwoApi = GetRealTimeBusListTwoApi(context);
     String query = '';
     int i = 0;

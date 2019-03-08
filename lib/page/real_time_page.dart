@@ -19,6 +19,8 @@ class _RealTimePageState extends State<RealTimePage> with AutomaticKeepAliveClie
   String _lineStation = '';
   StationBean _stationBean;
 
+  JvtdLoadingDialog _loadingDialog;
+
   @override
   bool get wantKeepAlive => true;
 
@@ -189,12 +191,33 @@ class _RealTimePageState extends State<RealTimePage> with AutomaticKeepAliveClie
     );
   }
 
+  void showLoading() {
+    if (_loadingDialog == null) {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            _loadingDialog = JvtdLoadingDialog();
+            return _loadingDialog;
+          });
+    }
+  }
+
+  void hideLoading() {
+    if (_loadingDialog != null) {
+      _loadingDialog.close(context);
+      _loadingDialog = null;
+    }
+  }
+
   void _selectStation() {
     if (_getBusApi == null) {
       _getBusApi = GetBusApi(context);
     }
     if (_busBean == null) {
+      showLoading();
       _getBusApi.start(GetBusReqBean(id: _selectLine.id).toJson()).then((value) {
+        hideLoading();
         if (value.success) {
           _busBean = value.result;
           _showStationsDialog();
